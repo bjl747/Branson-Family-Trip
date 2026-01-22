@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Branson Trip 2026</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- React & ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel Standalone -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* Custom scrollbar hiding */
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Larger base text for accessibility */
+    body {
+      font-size: 18px;
+      /* Base size increase */
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // --- ICONS (Inlined for reliability) ---
+    const Icon = ({ path, size = 24, className = "" }) => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+      >
+        {path}
+      </svg>
+    );
+
+    const Calendar = (props) => <Icon {...props} path={<><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></>} />;
+    const Users = (props) => <Icon {...props} path={<><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></>} />;
+    const DollarSign = (props) => <Icon {...props} path={<><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></>} />;
+    const MapPin = (props) => <Icon {...props} path={<><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></>} />;
+    const Clock = (props) => <Icon {...props} path={<><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></>} />;
+    const BatteryCharging = (props) => <Icon {...props} path={<><path d="M5 18H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3.19M15 6h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3.19"></path><line x1="23" y1="13" x2="23" y2="11"></line><polyline points="11 6 7 12 13 12 9 18"></polyline></>} />;
+    const AlertTriangle = (props) => <Icon {...props} path={<><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></>} />;
+    const Coffee = (props) => <Icon {...props} path={<><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></>} />;
+    const Utensils = (props) => <Icon {...props} path={<><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></>} />;
+    const Music = (props) => <Icon {...props} path={<><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></>} />;
+    const CheckCircle = (props) => <Icon {...props} path={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></>} />;
+    const ExternalLink = (props) => <Icon {...props} path={<><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></>} />;
+    const Navigation = (props) => <Icon {...props} path={<><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></>} />;
+    const Tent = (props) => <Icon {...props} path={<><path d="M19 21l-3.33-10a5.2 5.2 0 0 0-9.33 0L3 21"></path><path d="M3.5 21h17"></path><path d="M8.5 21v-4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v4"></path></>} />;
+    const ArrowRight = (props) => <Icon {...props} path={<><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></>} />;
+
+    const BransonApp = () => {
+      const [activeTab, setActiveTab] = useState('camp');
+
+      // --- CONFIGURATION ---
+      // Trip Start Date: Wednesday, March 18, 2026
+      const tripStartDate = new Date('2026-03-18T12:00:00');
+
+      // Helper to format dates
+      const getFormattedDate = (daysToAdd) => {
+        const date = new Date(tripStartDate);
+        date.setDate(date.getDate() + daysToAdd);
+        return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+      };
+
+      const itinerary = {
+        day1: {
+          title: "Day 1: Arrival",
+          date: getFormattedDate(0), // Wednesday
+          theme: "Low Impact",
+          color: "bg-green-100 text-green-900",
+          events: [
+            {
+              time: "1:00 PM",
+              title: "Provisioning Run",
+              location: "Harter House, Hollister",
+              url: "https://www.harterhouse.com/",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Harter+House+Hollister+MO",
+              icon: <Utensils size={24} />,
+              details: "Stop here BEFORE the Airbnb. Buy breakfast meats, milk, snacks, and drinks. Better than Walmart.",
+              alert: null
+            },
+            {
+              time: "3:00 PM",
+              title: "Check-in",
+              location: "Ridgedale Airbnb",
+              url: "https://www.airbnb.com/rooms/1014468810711834600",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Ridgedale+Missouri",
+              icon: <MapPin size={24} />,
+              details: "Unload. Set up Pack-n-Play. Grandparents take ground floor rooms.",
+              alert: null
+            },
+            {
+              time: "4:30 PM",
+              title: "Lost Canyon Cave",
+              location: "Top of the Rock",
+              url: "https://bigcedar.com/activity/lost-canyon-cave-nature-trail/",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Lost+Canyon+Cave+and+Nature+Trail+Ridgedale+MO",
+              icon: <BatteryCharging size={24} />,
+              details: "Electric golf cart tour. No walking required. Great views.",
+              alert: "Jeep 4xe Tip: Plug into Level 2 chargers at Welcome Center."
+            },
+            {
+              time: "6:30 PM",
+              title: "Dinner: Arnie's Barn",
+              location: "Top of the Rock",
+              url: "https://bigcedar.com/dining/arnies-barn/",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Arnie's+Barn+Ridgedale+MO",
+              icon: <Utensils size={24} />,
+              details: "Mexican cuisine in a historic barn. Good for kids & adults.",
+              alert: null
+            }
+          ]
+        },
+        day2: {
+          title: "Day 2: Silver Dollar City",
+          date: getFormattedDate(1), // Thursday
+          theme: "High Energy",
+          color: "bg-blue-100 text-blue-900",
+          events: [
+            {
+              time: "8:45 AM",
+              title: "Depart Airbnb",
+              location: "Airbnb",
+              url: null,
+              mapsUrl: null,
+              icon: <Coffee size={24} />,
+              details: "Head out after breakfast.",
+              alert: null
+            },
+            {
+              time: "9:30 AM",
+              title: "Park Arrival",
+              location: "Silver Dollar City",
+              url: "https://www.silverdollarcity.com/",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Silver+Dollar+City+Parking+Branson+MO",
+              icon: <AlertTriangle size={24} />,
+              details: "Park & take Tram.",
+              alert: "CRITICAL: Rent 2 ECVs (Scooters) immediately for grandparents."
+            },
+            {
+              time: "10:00 AM",
+              title: "Grand Exposition",
+              location: "SDC - Valley",
+              url: "https://www.silverdollarcity.com/theme-park/Attractions/Rides/The-Grand-Exposition",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=The+Grand+Exposition+Silver+Dollar+City",
+              icon: <MapPin size={24} />,
+              details: "Rides for the kids. Benches for the grandparents.",
+              alert: null
+            },
+            {
+              time: "12:30 PM",
+              title: "Lunch: Molly's Mill",
+              location: "SDC",
+              url: "https://www.silverdollarcity.com/theme-park/attractions/dining/mollys-mill/",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Molly's+Mill+Restaurant+Silver+Dollar+City",
+              icon: <Utensils size={24} />,
+              details: "Buffet style fried chicken. AC break.",
+              alert: null
+            },
+            {
+              time: "2:00 PM",
+              title: "The Strategic Split",
+              location: "SDC / Ridgedale",
+              url: null,
+              mapsUrl: null,
+              icon: <Users size={24} />,
+              details: "Option A: Nap time at Airbnb. Option B: Steam Train ride.",
+              alert: "Jeep 4xe: Use 'Hybrid' mode on strip."
+            },
+            {
+              time: "5:00 PM",
+              title: "Dinner: Danna's BBQ",
+              location: "Branson West",
+              url: "https://dannasbbq.com/",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Danna's+BBQ+and+Burger+Shop+Branson+West",
+              icon: <Utensils size={24} />,
+              details: "Casual order-at-counter. Best burgers.",
+              alert: null
+            }
+          ]
+        },
+        day3: {
+          title: "Day 3: Nature & Shows",
+          date: getFormattedDate(2), // Friday
+          theme: "Visuals",
+          color: "bg-purple-100 text-purple-900",
+          events: [
+            {
+              time: "9:00 AM",
+              title: "Breakfast: Billy Gail's",
+              location: "Hwy 265",
+              url: "https://billygailsrestaurant.com/",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Billy+Gail's+Branson+MO",
+              icon: <Coffee size={24} />,
+              details: "Huge pancakes. Arrive early.",
+              alert: "Bring cash just in case."
+            },
+            {
+              time: "11:00 AM",
+              title: "Aquarium",
+              location: "Boardwalk",
+              url: "https://www.aquariumattheboardwalk.com/",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Aquarium+at+the+Boardwalk+Branson",
+              icon: <MapPin size={24} />,
+              details: "Easy walking. Sensory friendly.",
+              alert: "Charge Jeep at Branson Landing if needed."
+            },
+            {
+              time: "1:00 PM",
+              title: "Lunch: Mel's Diner",
+              location: "Grand Village",
+              url: "https://melshardluckdiner.com/",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Mel's+Hard+Luck+Diner+Branson",
+              icon: <Music size={24} />,
+              details: "Singing servers. Burgers & shakes.",
+              alert: null
+            },
+            {
+              time: "5:30 PM",
+              title: "Dolly Parton's Stampede",
+              location: "The Strip",
+              url: "https://dpstampede.com/branson",
+              mapsUrl: "https://www.google.com/maps/search/?api=1&query=Dolly+Parton's+Stampede+Branson",
+              icon: <Music size={24} />,
+              details: "Arrive 4:45 PM. Dinner eaten with hands.",
+              alert: "Loud! Bring ear protection for 2yo."
+            }
+          ]
+        }
+      };
+
+      const familyBudget = [
+        { category: "Housing", item: "Airbnb Rental", cost: 1600, note: "Paid", url: "https://www.airbnb.com/rooms/1014468810711834600" },
+        { category: "Transport", item: "Jeep Fuel", cost: 150, note: "1k miles RT", url: null },
+        { category: "Food", item: "Groceries", cost: 180, note: "Harter House", url: "https://www.harterhouse.com/" },
+        { category: "Tickets", item: "Cave Tour", cost: 100, note: "Incl. gate fee", url: "https://bigcedar.com/activity/lost-canyon-cave-nature-trail/" },
+        { category: "Tickets", item: "Silver Dollar City", cost: 270, note: "2yo free", url: "https://www.silverdollarcity.com/" },
+        { category: "Tickets", item: "Aquarium", cost: 100, note: "2yo free", url: "https://www.aquariumattheboardwalk.com/" },
+        { category: "Tickets", item: "Dolly Stampede", cost: 190, note: "Dinner incl.", url: "https://dpstampede.com/branson" },
+        { category: "Dining", item: "Arnie's Barn", cost: 100, note: "Tip incl.", url: "https://bigcedar.com/dining/arnies-barn/" },
+        { category: "Dining", item: "Molly's Mill", cost: 60, note: "Tip incl.", url: "https://www.silverdollarcity.com/theme-park/attractions/dining/mollys-mill/" },
+        { category: "Dining", item: "Danna's BBQ", cost: 70, note: "Tip incl.", url: "https://dannasbbq.com/" },
+        { category: "Dining", item: "Billy Gail's", cost: 70, note: "Tip incl.", url: "https://billygailsrestaurant.com/" },
+        { category: "Dining", item: "Mel's Diner", cost: 70, note: "Tip incl.", url: "https://melshardluckdiner.com/" },
+        { category: "Misc", item: "Buffer", cost: 100, note: "Treats", url: null },
+      ];
+
+      const grandparentBudget = [
+        { category: "Day 1", item: "Cave Tour", cost: 40, note: "Senior Tix", url: "https://bigcedar.com/activity/lost-canyon-cave-nature-trail/" },
+        { category: "Day 1", item: "Arnie's Barn", cost: 40, note: "Dinner", url: "https://bigcedar.com/dining/arnies-barn/" },
+        { category: "Day 2", item: "Silver Dollar City", cost: 90, note: "Senior Tix", url: "https://www.silverdollarcity.com/" },
+        { category: "Day 2", item: "Scooter Rental", cost: 20, note: "Shared cost", url: "https://www.silverdollarcity.com/theme-park/Guest-Services/ECV-Wheelchair-Rentals" },
+        { category: "Day 2", item: "Molly's Mill", cost: 30, note: "Lunch", url: "https://www.silverdollarcity.com/theme-park/attractions/dining/mollys-mill/" },
+        { category: "Day 2", item: "Danna's BBQ", cost: 30, note: "Dinner", url: "https://dannasbbq.com/" },
+        { category: "Day 3", item: "Billy Gail's", cost: 30, note: "Breakfast", url: "https://billygailsrestaurant.com/" },
+        { category: "Day 3", item: "Aquarium", cost: 40, note: "Adult Tix", url: "https://www.aquariumattheboardwalk.com/" },
+        { category: "Day 3", item: "Mel's Diner", cost: 30, note: "Lunch", url: "https://melshardluckdiner.com/" },
+        { category: "Day 3", item: "Dolly Stampede", cost: 80, note: "Dinner Show", url: "https://dpstampede.com/branson" },
+        { category: "Fuel", item: "Gas Share", cost: 30, note: "Estimate", url: null },
+      ];
+
+      const renderCamp = () => (
+        <div className="flex flex-col items-center justify-center p-6 text-center pb-24 min-h-[80vh]">
+          <h1 className="text-6xl font-black text-amber-900 mb-8 font-serif tracking-tight drop-shadow-sm">BASE CAMP</h1>
+
+          <div className="relative flex items-center justify-center mb-8">
+            <a
+              href="https://www.google.com/maps/dir/?api=1&destination=270+Poolside+Pass,+Hollister,+MO+65672"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative z-10 w-72 h-72 rounded-full bg-green-600 border-8 border-amber-800 flex items-center justify-center shadow-xl active:scale-95 transition-transform"
+            >
+              <div className="absolute inset-0 bg-green-500 rounded-full scale-90 border-4 border-green-400 border-dashed"></div>
+              <div className="z-10 flex flex-col items-center">
+                <span className="text-8xl font-black text-white italic drop-shadow-lg">GO!</span>
+                <span className="text-white font-bold text-lg mt-2">Map to House</span>
+              </div>
+            </a>
+          </div>
+
+          <div className="bg-white/80 backdrop-blur p-6 rounded-2xl border-2 border-amber-200 z-10 shadow-lg max-w-sm w-full">
+            <p className="text-amber-900 font-bold text-2xl mb-1">270 Poolside Pass</p>
+            <p className="text-amber-800 text-xl">Hollister, MO</p>
+          </div>
+
+          <a
+            href="https://www.airbnb.com/rooms/1014468810711834600"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 px-8 py-4 bg-blue-600 text-white rounded-full font-bold text-xl shadow-lg active:bg-blue-700 flex items-center gap-2"
+          >
+            <ExternalLink size={24} /> View Airbnb
+          </a>
+        </div>
+      );
+
+      const renderTimeline = (dayKey) => {
+        const day = itinerary[dayKey];
+        return (
+          <div className="pb-24 animate-fade-in">
+            <div className={`p-8 ${day.color} rounded-b-[2.5rem] shadow-lg mb-8`}>
+              <h2 className="text-4xl font-bold font-serif mb-2">{day.title}</h2>
+              <p className="opacity-90 font-semibold text-xl">{day.date}</p>
+              <div className="mt-4 inline-block px-4 py-1.5 bg-white/60 rounded-full text-sm font-bold uppercase tracking-wider">
+                {day.theme}
+              </div>
+            </div>
+
+            <div className="px-4 space-y-6">
+              {day.events.map((event, idx) => (
+                <div key={idx} className="bg-white p-5 rounded-2xl shadow border border-gray-100 flex gap-4">
+                  <div className="flex-shrink-0 flex flex-col items-center pt-1 w-16">
+                    <span className="text-sm font-bold text-gray-500 text-center leading-tight">{event.time}</span>
+                    <div className="h-full w-1 bg-gray-100 mt-2 mb-1 rounded-full"></div>
+                  </div>
+                  <div className="flex-grow pb-2">
+                    <div className="flex items-start gap-3 mb-2">
+                      <div className="text-gray-600 mt-1">{event.icon}</div>
+                      <div>
+                        <h3 className="font-bold text-2xl text-gray-800 leading-tight">
+                          {event.url ? (
+                            <a href={event.url} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 hover:underline decoration-2 underline-offset-4">
+                              {event.title}
+                            </a>
+                          ) : (
+                            event.title
+                          )}
+                        </h3>
+                        <div className="flex items-center text-sm text-gray-500 mt-1">
+                          <MapPin size={16} className="mr-1" />
+                          <span className="mr-2 font-medium">{event.location}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-lg text-gray-700 leading-relaxed mb-4 pl-1">{event.details}</p>
+
+                    <div className="flex flex-wrap gap-2">
+                      {event.mapsUrl && (
+                        <a href={event.mapsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-sm font-bold border border-blue-100">
+                          <Navigation size={16} /> Directions
+                        </a>
+                      )}
+                    </div>
+
+                    {event.alert && (
+                      <div className="mt-3 bg-red-50 text-red-800 text-base p-3 rounded-lg flex items-start gap-3 border border-red-100">
+                        <AlertTriangle size={20} className="mt-0.5 flex-shrink-0 text-red-600" />
+                        <span className="font-medium">{event.alert}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      };
+
+      const renderBudget = (data, total, title, subtext) => (
+        <div className="pb-24 px-4 pt-8">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-gray-800">{title}</h2>
+            <p className="text-gray-600 text-lg mt-1">{subtext}</p>
+          </div>
+
+          <div className="space-y-4">
+            {data.map((item, idx) => (
+              <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center gap-4">
+                <div className="flex-1">
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{item.category}</div>
+                  <div className="font-bold text-xl text-gray-800 leading-tight">
+                    {item.url ? (
+                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 underline decoration-gray-300 underline-offset-4 decoration-2">
+                        {item.item}
+                      </a>
+                    ) : (
+                      item.item
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-500 mt-1 font-medium">{item.note}</div>
+                </div>
+                <div className="text-2xl font-black text-gray-700 whitespace-nowrap">
+                  ${item.cost}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-between items-center p-6 bg-gray-900 text-white rounded-2xl mt-8 shadow-xl">
+            <span className="font-bold text-xl">Estimated Total</span>
+            <span className="font-black text-4xl">${total}</span>
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="bg-gray-50 min-h-screen font-sans max-w-lg mx-auto relative shadow-2xl overflow-hidden border-x border-gray-200">
+
+          {/* Content Area */}
+          <div className="h-full overflow-y-auto scrollbar-hide bg-gray-50">
+            {activeTab === 'camp' && renderCamp()}
+            {activeTab === 'day1' && renderTimeline('day1')}
+            {activeTab === 'day2' && renderTimeline('day2')}
+            {activeTab === 'day3' && renderTimeline('day3')}
+            {activeTab === 'famBudget' && renderBudget(familyBudget, 3060, "Family Budget", "2 Adults + 2 Kids")}
+            {activeTab === 'gpBudget' && renderBudget(grandparentBudget, 460, "Grandparent Budget", "Per Person Allocations")}
+          </div>
+
+          {/* Navbar */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-between items-center px-2 py-3 max-w-lg mx-auto z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.1)]">
+            <NavButton
+              active={activeTab === 'camp'}
+              onClick={() => setActiveTab('camp')}
+              icon={<Tent size={24} />}
+              label="Camp"
+              color="text-amber-700 bg-amber-50"
+            />
+
+            <NavButton
+              active={activeTab === 'day1'}
+              onClick={() => setActiveTab('day1')}
+              icon={<Calendar size={24} />}
+              label="Wed"
+              color="text-green-700 bg-green-50"
+            />
+
+            <NavButton
+              active={activeTab === 'day2'}
+              onClick={() => setActiveTab('day2')}
+              icon={<Calendar size={24} />}
+              label="Thu"
+              color="text-blue-700 bg-blue-50"
+            />
+
+            <NavButton
+              active={activeTab === 'day3'}
+              onClick={() => setActiveTab('day3')}
+              icon={<Calendar size={24} />}
+              label="Fri"
+              color="text-purple-700 bg-purple-50"
+            />
+
+            <div className="w-px h-8 bg-gray-200 mx-1"></div>
+
+            <NavButton
+              active={['famBudget', 'gpBudget'].includes(activeTab)}
+              onClick={() => setActiveTab(activeTab === 'gpBudget' ? 'famBudget' : 'gpBudget')}
+              icon={<DollarSign size={24} />}
+              label={activeTab === 'gpBudget' ? 'GP $' : 'Fam $'}
+              color="text-emerald-700 bg-emerald-50"
+            />
+          </div>
+        </div>
+      );
+    };
+
+    const NavButton = ({ active, onClick, icon, label, color }) => (
+      <button
+        onClick={onClick}
+        className={`flex flex-col items-center justify-center p-2 rounded-xl flex-1 transition-all duration-200 ${active ? `${color} scale-105 shadow-sm` : 'text-gray-400 hover:bg-gray-50'}`}
+      >
+        <div className="mb-1">{icon}</div>
+        <span className="text-xs font-bold">{label}</span>
+      </button>
+    );
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<BransonApp />);
+  </script>
+</body>
+
+</html>
